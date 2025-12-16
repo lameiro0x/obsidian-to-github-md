@@ -75,8 +75,6 @@ If you rename folders without updating all occurrences, link resolution will be 
 └── fix_links.py
 ```
 
----
-
 This pipeline is intentionally opinionated and optimized for pentesting knowledge bases.
 
 ---
