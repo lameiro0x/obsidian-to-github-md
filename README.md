@@ -11,55 +11,149 @@ The goal is to make technical notes written in Obsidian fully usable as **public
 
 ---
 
-## Why this exists
+## Important note for external users
 
-Obsidian Markdown is optimized for local knowledge management, not for GitHub rendering.  
-When publishing notes directly to GitHub, common issues appear:
+To make this pipeline work in your own repository, you **must adapt the hard-coded folder names** (for example `Penetration Tester Path/Comandos` and `Penetration Tester Path/Academy`) to match **your own directory structure**.
 
-- Broken links between files
-- Incorrect anchors for headers
-- Non-standard image paths
-- Indexes or references that do not resolve correctly
+Folder names are not auto-detected and must be updated manually (see instructions below).
 
-This toolchain automates the conversion process in a **repeatable and deterministic way**, making it suitable for technical documentation, cybersecurity notes, and learning repositories.
 
 ---
 
-## What the toolchain does
+## How to adapt folder names to your own repository
 
-The conversion process is executed in a fixed order:
+**File to edit:** `fix_links.py`
 
-1. **Rename images** to ensure consistent and safe filenames
-2. **Normalize image references** inside Markdown files
-3. **Fix header anchors and internal indexes**
-4. **Fix links between Markdown files**
+You must update the folder name checks in **three places**.
 
-All steps are orchestrated by a single entrypoint script.
+### 1. Indexing logic
 
----
+Locate and modify these conditions:
 
-## Main script
-
-`conversion.sh` is the main entrypoint and must be executed from the root of the notes directory.
-
-```bash
-#!/bin/bash
-set -e
-
-echo "[STEP 1] Renaming images..."
-bash rename.sh
-
-echo "[STEP 2] Normalizing images in Markdown..."
-bash images_md.sh
-
-echo "[STEP 3] Fixing indexes and anchors..."
-python3 fix_anchor.py
-
-echo "[STEP 4] Fixing links between files..."
-python3 fix_links.py
-
-echo "[OK] All steps executed successfully in the correct order"
+```python
+if "/Penetration Tester Path/Comandos/" in p_str or "/Comandos/" in p_str:
+elif "/Penetration Tester Path/Academy/" in p_str or "/Academy/" in p_str:
 ```
+
+Replace them with your own folder names  
+(e.g. `/Notes/Commands/`, `/Notes/Theory/`).
+
+---
+
+### 2. Folder detection helpers
+
+Update the same paths inside:
+
+```python
+def is_in_academy(...)
+def is_in_comandos(...)
+```
+
+The same folder names **must be used consistently**.
+
+---
+
+### Important
+
+The priority rule (**Commands → Academy → others**) depends entirely on these folder name checks.  
+If you rename folders without updating all occurrences, link resolution will be incorrect.
+
+---
+
+## Expected repository structure (example)
+
+```
+.
+├── images/
+├── Penetration Tester Path/
+│   ├── Comandos/
+│   └── Academy/
+├── conversion
+├── rename.sh
+├── images_md.sh
+├── fix_anchor.py
+└── fix_links.py
+```
+
+---
+
+This pipeline is intentionally opinionated and optimized for pentesting knowledge bases.
+
+---
+
+## Script overview
+
+### rename.sh
+
+Renames all image files inside the `images/` directory to a GitHub-safe format:
+- Lowercase
+- Underscores instead of spaces or hyphens
+- No special characters
+
+Every rename operation is recorded in `cambios.txt`, which is later used to update image references in Markdown files.
+
+This script assumes **all images are stored under `images/`**.
+
+---
+
+### images_md.sh
+
+Scans **all Markdown files** and normalizes image links by:
+- Converting Obsidian image syntax (`![[image.png]]`) to standard Markdown
+- Fixing broken image syntaxes
+- Updating filenames according to `cambios.txt`
+
+The script assumes that all images are referenced from the `images/` directory and generates GitHub-compatible paths (`/images/...`).
+
+---
+
+### fix_anchor.py
+
+Regenerates Markdown indexes automatically for all `.md` files under the script’s base directory.
+
+It works by:
+- Removing any existing index section
+- Parsing valid Markdown headings
+- Generating a clean index with GitHub-compatible anchors
+- Ignoring headings inside code blocks
+
+This guarantees that all internal anchors behave exactly as GitHub expects.
+
+---
+
+### fix_links.py
+
+Converts Obsidian-style wikilinks (`[[note]]`, `[[note#section]]`) into absolute, GitHub-compatible Markdown links.
+
+This script is **tailored to a pentesting repository structure** and applies special resolution rules based on specific folder names:
+
+- `Penetration Tester Path/Comandos`
+- `Penetration Tester Path/Academy`
+
+When a note exists in multiple locations, the enforced priority is:
+
+**Comandos → Academy → others**
+
+This ensures that operational pentesting command notes take precedence over academy or general material.
+
+All generated links:
+- Are absolute paths from the repository root
+- Use anchors normalized to match GitHub’s exact behavior
+- Preserve visible text if a target file cannot be resolved
+
+---
+
+### conversion
+
+This is the orchestrator script.
+
+It executes all scripts in the correct order:
+1. Rename images
+2. Normalize image links in Markdown
+3. Regenerate indexes and anchors
+4. Fix links between Markdown files
+
+The script stops immediately if any step fails, ensuring consistency.
 
 ---
 
@@ -79,6 +173,8 @@ echo "[OK] All steps executed successfully in the correct order"
    ```
 
 2. **Place the scripts in your Obsidian vault or notes directory**
+
+3. **Adapt your notes structure or  the scritps, as it is mentioned in this README**
 
 3. **Give execution permissions**
    ```bash

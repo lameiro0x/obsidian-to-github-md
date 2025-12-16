@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-echo "[STEP 1] Renombrando imágenes..."
+echo "[STEP 1] Renaming images..."
 bash rename.sh
 
-echo "[STEP 2] Normalizando imágenes en Markdown..."
+echo "[STEP 2] Normalizing images in Markdown..."
 bash images_md.sh
 
-echo "[STEP 3] Corrigiendo índices y anchors..."
+echo "[STEP 3] Fixing indexes and anchors..."
 python3 fix_anchor.py
 
-echo "[STEP 4] Corrigiendo enlaces entre archivos..."
+echo "[STEP 4] Fixing links between files..."
 python3 fix_links.py
 
-echo "[OK] Todo ejecutado correctamente en el orden correcto"
+echo "[OK] Everything executed successfully in the correct order"

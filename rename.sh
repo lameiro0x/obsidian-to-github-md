@@ -3,10 +3,10 @@
 IMAGE_DIR="images"
 OUT="cambios.txt"
 
-# Vaciar archivo de cambios
+# Clear changes file
 echo "" > "$OUT"
 
-echo "[INFO] Renombrando imágenes..."
+echo "[INFO] Renaming images..."
 
 find "$IMAGE_DIR" -type f | while read img; do
     base=$(basename "$img")
@@ -18,14 +18,14 @@ find "$IMAGE_DIR" -type f | while read img; do
         | sed 's/-/_/g' \
         | sed 's/[^a-zA-Z0-9._]//g')
 
-    # Guardar en tabla de cambios
+    # Store mapping in changes table
     echo "$base|$new" >> "$OUT"
 
-    # Renombrar si es necesario
+    # Rename if needed
     if [[ "$base" != "$new" ]]; then
         mv "$img" "$dir/$new"
         echo "[RENAMED] $base → $new"
     fi
 done
 
-echo "[INFO] Archivo generado: $OUT"
+echo "[INFO] File generated: $OUT"

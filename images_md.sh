@@ -3,28 +3,28 @@
 IMAGE_DIR="images"
 CHANGES="cambios.txt"
 
-echo "[INFO] Normalizando imágenes para GitHub..."
+echo "[INFO] Normalizing images for GitHub..."
 
-# 1. Convertir sintaxis Obsidian y sintaxis rota
+# 1. Convert Obsidian syntax and broken syntax
 find . -type f -name "*.md" | while read -r md; do
 
-    # ![[imagen.png]]
+    # ![[image.png]]
     perl -pi -e 's|!\[\[([^]]+\.png)\]\]|![\1](/images/\1)|gi' "$md"
     perl -pi -e 's|!\[\[([^]]+\.jpg)\]\]|![\1](/images/\1)|gi' "$md"
     perl -pi -e 's|!\[\[([^]]+\.jpeg)\]\]|![\1](/images/\1)|gi' "$md"
     perl -pi -e 's|!\[\[([^]]+\.gif)\]\]|![\1](/images/\1)|gi' "$md"
 
-    # ![[images/imagen.png]]
+    # ![[images/image.png]]
     perl -pi -e 's|!\[\[images/([^]]+)\]\]|![\1](/images/\1)|gi' "$md"
 
-    # ![algo]/images/imagen.png   (sintaxis rota)
+    # ![alt]/images/image.png (broken syntax)
     perl -pi -e 's|!\[[^]]*\]/images/([^ )]+)|![\1](/images/\1)|gi' "$md"
 
 done
 
-echo "[INFO] Sintaxis corregida"
+echo "[INFO] Syntax fixed"
 
-# 2. Aplicar renombrados de cambios.txt
+# 2. Apply renames from cambios.txt
 if [[ -f "$CHANGES" ]]; then
     while IFS="|" read -r old new; do
         [[ -z "$old" || "$old" == "$new" ]] && continue
@@ -36,4 +36,4 @@ if [[ -f "$CHANGES" ]]; then
     done < "$CHANGES"
 fi
 
-echo "[OK] Todas las imágenes están correctas para GitHub"
+echo "[OK] All images are correct for GitHub"

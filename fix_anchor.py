@@ -1,32 +1,32 @@
 import os
 import re
 
-# Carpeta raíz: el directorio donde está este script
+# Root folder: the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def slugify(text):
     """
-    Genera anchors:
-    - minúsculas
-    - mantiene ñ y tildes
-    - elimina puntos
-    - símbolos → espacios
-    - espacios → guiones
-    - NORMALIZA guiones (--- → --)
+    Generate anchors:
+    - lowercase
+    - keeps ñ and accents
+    - removes dots
+    - symbols → spaces
+    - spaces → hyphens
+    - NORMALIZES hyphens (--- → --)
     """
     text = text.lower()
 
-    # GitHub elimina los puntos
+    # GitHub removes dots
     text = text.replace(".", "")
 
-    # Todo lo que NO sea letra Unicode, número, espacio, _ o - → espacio
+    # Anything that is NOT a Unicode letter, number, space, _ or - → space
     text = re.sub(r"[^\w\s\-ñáéíóúü]", " ", text, flags=re.UNICODE)
 
-    # Espacios → guiones
+    # Spaces → hyphens
     text = re.sub(r"\s+", "-", text)
 
-    # Normalizar guiones: 3 o más → exactamente 2
+    # Normalize hyphens: 3 or more → exactly 2
     text = re.sub(r"-{3,}", "--", text)
 
     return text.strip("-")

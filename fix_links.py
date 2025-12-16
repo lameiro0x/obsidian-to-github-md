@@ -5,7 +5,7 @@ import urllib.parse
 
 ROOT = Path(".")
 
-# Indexar .md existentes, separando Academy y Comandos para resolver colisiones por nombre
+# Index existing .md files, separating Academy and Commands to resolve name collisions
 academy_index = {}
 comandos_index = {}
 other_index = {}
@@ -24,11 +24,11 @@ for p in ROOT.rglob("*.md"):
 
 def slugify_github(text: str) -> str:
     """
-    Genera anchors EXACTOS como GitHub:
-    - minúsculas
-    - sin acentos
-    - sin símbolos
-    - espacios -> -
+    Generate EXACT GitHub anchors:
+    - lowercase
+    - no accents
+    - no symbols
+    - spaces -> hyphens
     """
     text = unicodedata.normalize("NFKD", text)
     text = "".join(c for c in text if not unicodedata.combining(c))
@@ -51,16 +51,16 @@ def is_in_comandos(current_path: Path) -> bool:
 
 def find_file(name: str, current_path: Path):
     """
-    Resuelve un nombre de nota (sin ruta) a un Path real.
-    Regla clave:
-      - Si el archivo actual está en Academy y existe homónimo en Comandos, usar Comandos.
-      - En general, preferir Comandos > Academy > otros.
+    Resolve a note name (without path) to a real Path.
+    Key rule:
+      - If the current file is in Academy and a homonym exists in Commands, use Commands.
+      - In general, prefer Commands > Academy > others.
     """
-    # Ignorar rutas antiguas, quedarse solo con el nombre
+    # Ignore old paths, keep only the filename
     key = name.strip().split("/")[-1].replace(".md", "").lower()
 
     if is_in_academy(current_path):
-        # Desde Academy: priorizar Comandos si existe
+        # From Academy: prioritize Commands if it exists
         if key in comandos_index:
             return comandos_index[key]
         if key in academy_index:
@@ -68,14 +68,14 @@ def find_file(name: str, current_path: Path):
         return other_index.get(key)
 
     if is_in_comandos(current_path):
-        # Desde Comandos: mantener preferencia natural a Comandos
+        # From Commands: keep natural preference for Commands
         if key in comandos_index:
             return comandos_index[key]
         if key in academy_index:
             return academy_index[key]
         return other_index.get(key)
 
-    # Desde cualquier otra ubicación: preferir Comandos, luego Academy
+    # From any other location: prefer Commands, then Academy
     if key in comandos_index:
         return comandos_index[key]
     if key in academy_index:
@@ -97,10 +97,10 @@ def convert_md(path: Path):
         target = find_file(filename, path)
 
         if not target:
-            # No borrar contenido: dejar texto visible
+            # Do not delete content: keep visible text
             return alias
 
-        # Ruta absoluta desde la raíz del repo (GitHub-friendly)
+        # Absolute path from repo root (GitHub-friendly)
         rel = "/" + urllib.parse.quote(str(target.relative_to(ROOT)).replace("\\", "/"))
 
         if anchor:
@@ -116,4 +116,4 @@ def convert_md(path: Path):
 for md in ROOT.rglob("*.md"):
     convert_md(md)
 
-print("[OK] Wikilinks convertidos correctamente para GitHub (Academy -> Comandos preferido)") 
+print("[OK] Wikilinks successfully converted for GitHub (Commands preferred over Academy)")
